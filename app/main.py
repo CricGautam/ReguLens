@@ -68,7 +68,7 @@ def upload_document(file: UploadFile = File(...)):
         unique_id = uuid4().hex
         saved_pdf_path = RAW_DATA_DIR / f"{unique_id}.pdf"
 
-        with saved_pdf_path.open("wb") as destination: 
+        with saved_pdf_path.open("wb") as destination:
             while chunk := file.file.read(1024 * 1024):
                 destination.write(chunk)
 
@@ -83,17 +83,12 @@ def upload_document(file: UploadFile = File(...)):
 
         # 3. Extract PDF text
         extracted_text = extract_pdf_text(saved_pdf_path)
-        
-
         if not extracted_text.strip():
             raise ValueError("No extractable text found in the PDF.")
-
         #  Mask sensitive information
         masked_text = mask_pii(extracted_text)
-        
         # 4. Classify the document
         document_type = classify_document(extracted_text)
-
         # 5. Save the masked text
         saved_text_path = PROCESSED_DATA_DIR / f"{unique_id}.txt"
         saved_text_path.write_text(

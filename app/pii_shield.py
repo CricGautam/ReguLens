@@ -72,4 +72,4 @@ def mask_pii(text: str) -> str:
     # Preserve remaining text
     masked_parts.append(text[last_position:])
 
-    return "".join(masked_parts)     
+    return "".join(masked_parts)
