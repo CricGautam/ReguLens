@@ -1,0 +1,3 @@
+from app.database import add_parent_obligation_column
+
+add_parent_obligation_column()
