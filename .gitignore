@@ -1,11 +1,39 @@
+# Python virtual environment
 .venv/
 __pycache__/
 *.pyc
+.pytest_cache/
+
+#secrets
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local databases
 *.db
+*.sqlite
+*.sqlite3
+data/chroma_db/
 chroma_data/
+
+#Generated data
 data/raw/
 data/processed/
 models/
-.pytest_cache/
+*.gguf
+
+# VS Code
 .vscode/
+
+.venv-test/
+data/reference/dpdp/regulations/*.pdf
+requirements-lock.txt
+
+# Local development and debugging scripts
+/test_classifier.py
+/test_database.py
+/test_document_processor.py
+/test_pdf_extraction.py
+/verify_upload.py
