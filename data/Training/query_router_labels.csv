@@ -1,0 +1,21 @@
+query,label
+"What obligations are specified under DPDP Rule 6?",regulatory
+"Explain the statutory requirements for protecting personal data",regulatory
+"What does the DPDP Act require from data fiduciaries?",regulatory
+"Which legal provisions govern data breach notifications?",regulatory
+"Summarize the regulatory requirements for consent",regulatory
+"What does our access control policy say about permissions?",policy_rag
+"Explain NovaCart's password management policy",policy_rag
+"Find the internal policy covering user access reviews",policy_rag
+"What procedures are defined for employee access?",policy_rag
+"Retrieve our internal security policy on authentication",policy_rag
+"Is evidence available for the quarterly access review?",evidence
+"Which controls have missing supporting evidence?",evidence
+"Check the Q3 access review completion records",evidence
+"Show missing audit evidence for control NC-AC-003",evidence
+"Which review periods have incomplete evidence?",evidence
+"Compare our policy against DPDP Rule 6",multi_agent
+"Identify gaps between regulatory obligations and internal controls",multi_agent
+"Assess compliance using regulations policies and evidence",multi_agent
+"Which legal requirements lack supporting control evidence?",multi_agent
+"Generate a compliance gap assessment for NovaCart",multi_agent

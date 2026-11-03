@@ -1,0 +1,26 @@
+text,label
+"The Digital Personal Data Protection Act establishes statutory obligations for data fiduciaries",regulation
+"The government issued a notification prescribing regulatory compliance requirements",regulation
+"Section 8 of the Act requires reasonable security safeguards for personal data",regulation
+"The regulatory authority published rules governing personal data processing",regulation
+"Statutory provisions establish penalties for noncompliance with the Act",regulation
+"The company access control policy requires quarterly permission reviews",internal_policy
+"Employees must follow the internal information security policy",internal_policy
+"The organization mandates multifactor authentication for remote access",internal_policy
+"The approved standard operating procedure defines employee onboarding",internal_policy
+"Management requires all privileged accounts to follow access control procedures",internal_policy
+"This vendor agreement defines the responsibilities of both contracting parties",contract
+"The service level agreement establishes uptime and support commitments",contract
+"The contract specifies payment terms confidentiality and termination clauses",contract
+"The supplier shall deliver services according to the executed agreement",contract
+"The parties agree to comply with the contractual obligations described herein",contract
+"The internal audit report identified missing access review approvals",audit_evidence
+"The audit evidence contains supporting access review records",audit_evidence
+"The control testing report documents exceptions found during the assessment",audit_evidence
+"The quarterly access review log contains reviewer signatures and timestamps",audit_evidence
+"The compliance auditor collected evidence supporting the security controls",audit_evidence
+"The enterprise risk register identifies threats to information assets",risk_record
+"The risk assessment identifies high probability security incidents",risk_record
+"The incident report documents unauthorized access to sensitive information",risk_record
+"The risk mitigation plan assigns owners and remediation deadlines",risk_record
+"The organization recorded operational risks and their impact ratings",risk_record

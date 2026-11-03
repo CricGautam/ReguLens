@@ -40,11 +40,22 @@ def extract_rule_section(pages, rule_number):
 
     return match.group(0).strip() if match else None
 
-def extract_rule_clauses(rule_text, rule_number):
-    pattern = r"(?m)^\(([a-z])\)\s+"
 
-    matches = list(re.finditer(pattern, rule_text))
+def extract_rule_clauses(rule_text, rule_number):
+    letter_pattern = r"(?m)^\(([a-z])\)\s+"
+    number_pattern = r"(?m)^\((\d+)\)\s+"
+
+    letter_matches = list(re.finditer(letter_pattern, rule_text))
+    number_matches = list(re.finditer(number_pattern, rule_text))
+
     clauses = []
+
+    if letter_matches:
+        matches = letter_matches
+        clause_type = "letter"
+    else:
+        matches = number_matches
+        clause_type = "number"
 
     for index, match in enumerate(matches):
         start = match.end()
@@ -52,15 +63,22 @@ def extract_rule_clauses(rule_text, rule_number):
         if index + 1 < len(matches):
             end = matches[index + 1].start()
         else:
-            end_match = re.search(r"(?m)^\(\d+\)\s+", rule_text[start:])
+            end_match = re.search(number_pattern, rule_text[start:])
             end = start + end_match.start() if end_match else len(rule_text)
 
+        legal_reference = (
+            f"Rule {rule_number}(1)({match.group(1)})"
+            if clause_type == "letter"
+            else f"Rule {rule_number}({match.group(1)})"
+        )
+
         clauses.append({
-            "legal_reference": f"Rule {rule_number}(1)({match.group(1)})",
+            "legal_reference": legal_reference,
             "requirement_text": " ".join(rule_text[start:end].split())
         })
 
     return clauses
+
 
 def find_rule_start_page(pages, rule_number):
     import re
@@ -93,15 +111,15 @@ def extract_requirements_with_sources(pdf_path, rule_number):
 
     return clauses
 
+
 def extract_rule_preamble(rule_text):
-    """
-    Extract the introductory obligation before clause (a).
-    """
-    match = re.search(r"(?m)^\(a\)\s+", rule_text)
+    match = re.search(r"(?m)^\((?:[a-z]|\d+)\)\s+", rule_text)
 
     if not match:
-        return None
+        return "No separate introductory obligation identified."
 
-    preamble = rule_text[:match.start()].strip()
+    preamble = " ".join(rule_text[:match.start()].split())
 
-    return " ".join(preamble.split())
+    return preamble if len(preamble) >= 10 else (
+        "No separate introductory obligation identified."
+    )
