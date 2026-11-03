@@ -6,14 +6,20 @@ from uuid import uuid4
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from app.pii_shield import mask_pii
 
+from pydantic import BaseModel, Field
+from app.ML.query_router_service import route_query
+from app.Orchestration.compliance_graph import compliance_graph
+
 from app.database import (
     initialize_database,
     register_document,
     update_document_status,
     update_document_type,
+    get_document_by_id,
 )
 from app.document_processor import extract_pdf_text
 from app.classifier import classify_document
+from app.ML.document_classifier_service import predict_document_type
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
@@ -43,6 +49,14 @@ def root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+class QueryRequest(BaseModel):
+    query: str = Field(min_length=1)
+
+
+@app.post("/queries/route")
+def predict_query_route(request: QueryRequest):
+    return route_query(request.query)
 
 
 @app.post("/documents/upload")
@@ -88,7 +102,10 @@ def upload_document(file: UploadFile = File(...)):
         #  Mask sensitive information
         masked_text = mask_pii(extracted_text)
         # 4. Classify the document
-        document_type = classify_document(extracted_text)
+        document_type = classify_document(masked_text)
+
+        # Experimental ML prediction (does not override existing classification)
+        ml_prediction = predict_document_type(masked_text)
         # 5. Save the masked text
         saved_text_path = PROCESSED_DATA_DIR / f"{unique_id}.txt"
         saved_text_path.write_text(
@@ -107,9 +124,10 @@ def upload_document(file: UploadFile = File(...)):
             "processing_status": "processed",
             "extracted_characters": len(extracted_text),
             "processed_text_path": str(
-                saved_text_path.relative_to(PROJECT_ROOT)
+                saved_text_path.relative_to(PROJECT_ROOT),
             ),
-            "message": "PDF uploaded, extracted, and classified successfully",
+            "ml_prediction": ml_prediction,
+            "message": "PDF uploaded, extracted, and classified successfully"
         }
 
     except Exception as error:
@@ -132,3 +150,63 @@ def upload_document(file: UploadFile = File(...)):
 
     finally:
         file.file.close()
+
+
+
+class AssessmentRequest(BaseModel):
+    query: str = Field(min_length=1)
+    document_id: int = Field(gt=0)
+    rule_number: int = Field(gt=0)
+
+
+@app.post("/assessments/run")
+def run_compliance_assessment(request: AssessmentRequest):
+
+    # 1. Find the uploaded document in SQLite
+    document = get_document_by_id(request.document_id)
+
+    if document is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Document not found"
+        )
+
+    # 2. Only processed regulations can be assessed
+    if document["processing_status"] != "processed":
+        raise HTTPException(
+            status_code=400,
+            detail="Document is not ready for assessment"
+        )
+
+    if document["document_type"] != "regulation":
+        raise HTTPException(
+            status_code=400,
+            detail="Selected document is not classified as a regulation"
+        )
+
+    # 3. Resolve the registered file safely
+    raw_directory = RAW_DATA_DIR.resolve()
+    regulation_path = (
+        PROJECT_ROOT / document["file_path"]
+    ).resolve()
+
+    if (
+        not regulation_path.is_relative_to(raw_directory)
+        or regulation_path.suffix.lower() != ".pdf"
+        or not regulation_path.is_file()
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Registered regulation file is invalid or unavailable"
+        )
+
+    # 4. Execute our existing LangGraph workflow
+    result = compliance_graph.invoke({
+    "query": request.query,
+    "document_id": request.document_id,
+    "rule_number": request.rule_number
+})
+
+    return result["draft_report"]
+
+

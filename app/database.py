@@ -274,3 +274,18 @@ def update_requirement_parent_obligation(
         ))
 
         return cursor.rowcount
+
+
+def get_document_by_id(document_id: int):
+    with get_connection() as connection:
+        document = connection.execute(
+            """
+            SELECT id, filename, document_type,
+                   file_path, processing_status
+            FROM documents
+            WHERE id = ?
+            """,
+            (document_id,)
+        ).fetchone()
+
+        return dict(document) if document else None
